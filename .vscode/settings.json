@@ -1,0 +1,24 @@
+{
+    "files.exclude": {
+        "**/__pycache__": true
+    },
+    "files.insertFinalNewline": true,
+
+    "files.trimTrailingWhitespace": true,
+
+    "python-envs.defaultEnvManager": "ms-python.python:poetry",
+    "python-envs.defaultPackageManager": "ms-python.python:poetry",
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+
+    "search.exclude": {
+        "**/.idea": true,
+        "**/.venv": true,
+        "**/.pytest_cache": true,
+        "**/.ruff_cache": true,
+        "**/dist": true
+    },
+}
