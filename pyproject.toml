@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "pg-advisory-lock"
+version = "0.0.1"
+description = "Pythonic PostgreSQL advisory locking for SQLAlchemy, with flexible keys and pluggable failure handling."
+authors = ["Alexander Tryastsyn"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
