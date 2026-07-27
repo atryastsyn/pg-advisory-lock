@@ -4,9 +4,46 @@ version = "0.0.1"
 description = "Pythonic PostgreSQL advisory locking for SQLAlchemy, with flexible keys and pluggable failure handling."
 authors = ["Alexander Tryastsyn"]
 readme = "README.md"
+packages = [{ include = "pg_advisory_lock", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.12"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^9.1.1"
+ruff = "^0.16.0"
+
+[tool.ruff]
+line-length = 120
+include = ["src/*.py", "tests/*.py"]
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests",]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
 
 
 [build-system]
