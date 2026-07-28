@@ -11,7 +11,7 @@ def validate(args: Iterable[Any]):
 
     for _arg in args:
         if _arg is None:
-            raise PgAdvisoryLockError('Lock argument can not be "None"')
+            raise PgAdvisoryLockError('Lock argument can not be "None".')
 
 
 def normalize(arg: Any) -> str:

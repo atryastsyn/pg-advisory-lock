@@ -4,6 +4,22 @@ All notable changes to PG Advisory Lock will be documented in this file.
 
 ---
 
+## [0.0.3] - 2026-07-28
+
+### Added
+
+- Add tests for `lock_argumets.py` methods
+- Add test drafts for `lock.py` methods
+- Add facade method to update a `lock_timeout` local setting
+
+### Changed
+
+- TODO updated
+
+### Notes
+
+---
+
 ## [0.0.2] - 2026-07-28
 
 ### Added

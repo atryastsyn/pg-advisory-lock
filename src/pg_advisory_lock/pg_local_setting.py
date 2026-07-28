@@ -5,19 +5,12 @@ from sqlalchemy import text
 from sqlalchemy.exc import InternalError
 from sqlalchemy.orm import Session
 
-from .exceptions import PgAdvisoryLockError
-
 IN_FAILED_SQL_TRANSACTION = '25P02'
 
-ALLOWED_SETTINGS = {'lock_timeout', 'statement_timeout'}
 
-
-def pg_reset_local_setting(db_session: Session, name: str):
-    if name not in ALLOWED_SETTINGS:
-        raise PgAdvisoryLockError(f'Setting name "{name}" is not allowed')
-
+def pg_reset_local_setting(session: Session, name: str):
     try:
-        db_session.execute(text(f'SET LOCAL {name} = DEFAULT'))
+        session.execute(text(f'SET LOCAL {name} = DEFAULT'))
     except InternalError as e:
         pgcode = getattr(e.orig, 'pgcode', None)
         if pgcode == IN_FAILED_SQL_TRANSACTION:
@@ -27,12 +20,14 @@ def pg_reset_local_setting(db_session: Session, name: str):
 
 
 @contextmanager
-def pg_set_local_setting(db_session: Session, name: str, timeout: int | str):
-    if name not in ALLOWED_SETTINGS:
-        raise PgAdvisoryLockError(f'Setting name "{name}" is not allowed')
-
-    db_session.execute(text(f'SET LOCAL {name} = :val'), {'val': str(timeout)})
+def pg_set_local_setting(session: Session, name: str, timeout: int | str):
+    session.execute(text(f'SET LOCAL {name} = :val'), {'val': str(timeout)})
     try:
         yield
     finally:
-        pg_reset_local_setting(db_session=db_session, name=name)
+        pg_reset_local_setting(session=session, name=name)
+
+
+def set_lock_timeout(session: Session, timeout: int | str):
+    setting_name = 'lock_timeout'
+    return pg_set_local_setting(session=session, name=setting_name, timeout=timeout)
