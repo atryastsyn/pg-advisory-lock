@@ -2,6 +2,24 @@
 
 All notable changes to PG Advisory Lock will be documented in this file.
 
+
+---
+
+## [0.0.4] - 2026-08-04
+
+### Added
+
+- Add `psycopg` as DEV dependency.
+- Add test PG instance with Docker Container.
+- Add tests for `lock.py` methods with real SQL Alchemy Session.
+
+### Changed
+
+- TODO updated.
+
+### Notes
+
+
 ---
 
 ## [0.0.3] - 2026-07-28

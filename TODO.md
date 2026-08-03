@@ -2,8 +2,7 @@
 
 ## Next
 
-- [ ] TB-003 Add test PG instance (Docker maybe)
-- [ ] TB-004 Add tests for lock and lock immediate
+- [ ] TB-004 Reset local setting with its previous value, not `DEFAULT` one.
 
 ## Backlog
 
@@ -12,4 +11,4 @@
 ## Ideas
 
 - [ ] Get the `statement_timeout` and make sure `lock_timeout` is less or equal
-- [ ] Reset local setting with its previous value, not `DEFAULT` one.
+- [ ] Do I need `psycopg` be package dependency or just DEV?
