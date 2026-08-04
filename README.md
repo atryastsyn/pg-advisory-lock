@@ -110,7 +110,13 @@ Lock components are normalized as follows:
 
 - SQLAlchemy models and tables → table name
 - Other supported objects → string representation
-- All components are joined with `:` and hashed to a signed 64-bit integer
+
+The normalized strings are serialized as a compact JSON array, preserving component
+boundaries even when values contain separators. The serialized value is hashed with
+SHA-256 and mapped to PostgreSQL's signed 64-bit advisory-lock key range.
+
+Normalization is intentionally type-insensitive, so values with the same normalized
+string representation, such as `1` and `'1'`, produce the same lock key.
 
 
 ### Thread safety

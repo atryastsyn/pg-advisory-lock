@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 import pytest
-from sqlalchemy import Column, Integer, MetaData, String, Table
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import DeclarativeBase
 
 from src.pg_advisory_lock import PGAdvisoryLock, PgAdvisoryLockError
@@ -16,17 +16,6 @@ class UserModel(Base):
     id = Column(Integer, primary_key=True)
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
-
-
-@pytest.fixture
-def test_table() -> Table:
-    metadata = MetaData()
-    return Table(
-        'test_items',
-        metadata,
-        Column('id', Integer, primary_key=True),
-        Column('name', String, nullable=False),
-    )
 
 
 def test_get_key_from_args_deterministic_same_args():
@@ -106,3 +95,18 @@ def test_lock_copies_arguments_to_immutable_tuple():
     lock_args.append(123)  # type: ignore
 
     assert lock.lock_args == ('payment',)
+
+
+def test_get_key_from_args_distinguishes_component_boundaries():
+    first_key = get_key_from_args(('a:b', 'c'))
+    second_key = get_key_from_args(('a', 'b:c'))
+
+    assert first_key != second_key
+
+
+def test_get_key_from_args_matches_stable_key():
+    assert get_key_from_args(('user_sync', 'RU', 123)) == 4110131889271348223
+
+
+def test_get_key_from_args_normalizes_equivalent_values():
+    assert get_key_from_args((1,)) == get_key_from_args(('1',))

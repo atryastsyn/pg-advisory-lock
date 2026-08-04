@@ -3,6 +3,28 @@
 All notable changes to PG Advisory Lock will be documented in this file.
 
 
+## [0.0.6] - 2026-08-04
+
+### Added
+
+- Add regression coverage for ambiguous lock-argument boundaries.
+- Add a fixed key vector to detect unintended serialization changes.
+- Add coverage for intentionally type-insensitive normalization.
+
+### Changed
+
+- Serialize normalized lock arguments as a compact JSON array instead of joining them with `:`.
+- Preserve component boundaries when lock values contain separator characters.
+- Use explicit SQLAlchemy type checks when normalizing model instances and tables.
+- Update key-generation documentation to describe JSON serialization and normalized-value semantics.
+
+### Notes
+
+- The new serialization format changes generated lock keys compared with previous versions.
+- Values with the same normalized string representation, such as `1` and `'1'`, intentionally share a lock key.
+- PostgreSQL’s signed 64-bit key space retains a theoretical hash-collision risk.
+
+---
 
 ## [0.0.5] - 2026-08-04
 
@@ -29,7 +51,6 @@ All notable changes to PG Advisory Lock will be documented in this file.
 
 - Lock contention can still raise exceptions or return `False`, according to `raise_on_failure`.
 - Unexpected database and infrastructure errors are always propagated to the caller.
-
 
 ---
 

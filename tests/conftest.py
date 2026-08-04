@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import Column, Integer, MetaData, String, Table, create_engine
 from sqlalchemy.orm import sessionmaker
 
 # Check /docker/compose.yaml file to be sure
@@ -18,3 +18,14 @@ def engine_factory():
 @pytest.fixture
 def session_factory(engine_factory):
     return sessionmaker(bind=engine_factory)
+
+
+@pytest.fixture
+def test_table() -> Table:
+    metadata = MetaData()
+    return Table(
+        'test_items',
+        metadata,
+        Column('id', Integer, primary_key=True),
+        Column('name', String, nullable=False),
+    )

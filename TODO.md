@@ -2,7 +2,6 @@
 
 ## Next
 
-- [ ] Make lock-key serialization unambiguous and type-aware.
 - [ ] Validate that raise_on_failure is strictly a bool.
 - [ ] Preserve the caller’s previous lock_timeout.
 - [ ] Add rollback-release, re-entrancy, and broader SQLSTATE tests.
