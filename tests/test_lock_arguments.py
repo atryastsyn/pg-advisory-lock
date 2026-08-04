@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import Column, Integer, MetaData, String, Table
 from sqlalchemy.orm import DeclarativeBase
 
-from src.pg_advisory_lock import PgAdvisoryLockError
+from src.pg_advisory_lock import PGAdvisoryLock, PgAdvisoryLockError
 from src.pg_advisory_lock.lock_arguments import get_key_from_args, normalize, validate
 
 
@@ -51,8 +51,8 @@ def test_get_key_from_args_order_matters():
     argnames='lock_args, expected_exception, exception_message',
     argvalues=[
         ((1, 2, 3), None, None),
-        ([], PgAdvisoryLockError, 'At least one lock argument is required.'),
-        ([None, 2, 3], PgAdvisoryLockError, 'Lock argument can not be "None".'),
+        (tuple(), PgAdvisoryLockError, 'At least one lock argument is required.'),
+        ((None, 2, 3), PgAdvisoryLockError, 'Lock argument can not be "None".'),
     ],
     ids=['No Exception', 'Empty lock arguments list', 'None is not allowed'],
 )
@@ -79,3 +79,30 @@ def test_normalize_table(test_table):
 )
 def test_normalize_other_types(lock_arg, result):
     assert normalize(arg=lock_arg) == result
+
+
+@pytest.mark.parametrize(
+    'lock_args',
+    [
+        'payment',
+        {'payment'},
+        {'payment': 1},
+        (value for value in ['payment']),
+        None,
+    ],
+)
+def test_lock_rejects_non_list_or_tuple_arguments(lock_args):
+    with pytest.raises(
+        PgAdvisoryLockError,
+        match='Lock arguments must be a list or tuple.',
+    ):
+        PGAdvisoryLock(lock_args)
+
+
+def test_lock_copies_arguments_to_immutable_tuple():
+    lock_args = ['payment']
+    lock = PGAdvisoryLock(lock_args)
+
+    lock_args.append(123)  # type: ignore
+
+    assert lock.lock_args == ('payment',)

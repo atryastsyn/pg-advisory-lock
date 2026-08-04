@@ -1,11 +1,10 @@
 import hashlib
-from collections.abc import Iterable
 from typing import Any
 
 from .exceptions import PgAdvisoryLockError
 
 
-def validate(args: Iterable[Any]):
+def validate(args: tuple[Any, ...]):
     if not args:
         raise PgAdvisoryLockError('At least one lock argument is required.')
 
@@ -23,7 +22,7 @@ def normalize(arg: Any) -> str:
         return str(arg)
 
 
-def get_key_from_args(args: Iterable[Any]) -> int:
+def get_key_from_args(args: tuple[Any, ...]) -> int:
     """Compute a 64-bit signed integer key for PostgreSQL advisory locks from lock arguments.
 
     This method converts variable lock arguments into a deterministic 64-bit key by:

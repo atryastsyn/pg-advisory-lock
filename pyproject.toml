@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pg-advisory-lock"
-version = "0.0.4"
+version = "0.0.5"
 description = "Pythonic PostgreSQL advisory locking for SQLAlchemy, with flexible keys and pluggable failure handling."
 authors = ["Alexander Tryastsyn"]
 readme = "README.md"
@@ -18,7 +18,7 @@ psycopg = "^3.3.4"
 
 [tool.ruff]
 line-length = 120
-include = ["src/*.py", "tests/*.py"]
+include = ["src/**/*.py", "tests/*.py"]
 
 [tool.ruff.format]
 quote-style = "single"

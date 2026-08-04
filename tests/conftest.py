@@ -2,6 +2,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+# Check /docker/compose.yaml file to be sure
 DB_URL = 'postgresql+psycopg://postgres:123@localhost:6543/'
 
 

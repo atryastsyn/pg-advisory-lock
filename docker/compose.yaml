@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:18
-    container_name: postgres18
+    container_name: pg-advisory-lock-postgres18
 
     ports:
       - "6543:5432"
@@ -15,7 +15,7 @@ services:
       - postgres_data:/var/lib/postgresql
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app_user -d app_db"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d testing"]
       interval: 5s
       timeout: 5s
       retries: 5
