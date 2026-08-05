@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.0.8] - 2026-08-05
+
+### Added
+
+- Add a README example importing the complete public API from the installed package.
+
+### Changed
+
+- Import `pg_advisory_lock` in tests instead of the source-tree path `src.pg_advisory_lock`.
+- Update mock targets to use the installed package namespace.
+- Improve local-setting restoration coverage for both `lock_timeout` and `statement_timeout`.
+- Update the package version and project priority list.
+
+### Notes
+
+- The distribution name remains `pg-advisory-lock`, while Python code imports `pg_advisory_lock`.
+- Tests now exercise the same package namespace used by library consumers.
+
+---
+
 ## [0.0.7] - 2026-08-05
 
 ### Added
@@ -21,7 +41,8 @@
 ### Notes
 
 - Non-boolean `raise_on_failure` values now raise `PgAdvisoryLockError`.
-- `lock()` temporarily changes `lock_timeout` without permanently replacing the caller's existing transaction-local value.
+- `lock()` temporarily changes `lock_timeout` without permanently replacing the caller's existing
+  transaction-local value.
 - The `PgAdvisoryLock` rename changes the public import name from the previous development versions.
 
 ---
@@ -60,7 +81,8 @@
 
 ### Changed
 
-- Isolate blocking lock acquisition within a savepoint so PostgreSQL lock timeouts do not abort the caller's transaction.
+- Isolate blocking lock acquisition within a savepoint so PostgreSQL lock timeouts do not abort the caller's
+  transaction.
 - Treat only PostgreSQL SQLSTATE `55P03` as expected lock contention; propagate database and infrastructure errors.
 - Support SQLSTATE detection for both Psycopg 3 (`sqlstate`) and Psycopg 2 (`pgcode`).
 - Make `PgAdvisoryLockTimeout` a subclass of `PgAdvisoryLockNotAcquired`.

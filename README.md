@@ -32,6 +32,17 @@ automatically released when the transaction commits or rolls back.
 
 
 ### Usage examples:
+Import the public API from the installed package:
+
+```python
+from pg_advisory_lock import (
+    PgAdvisoryLock,
+    PgAdvisoryLockError,
+    PgAdvisoryLockNotAcquired,
+    PgAdvisoryLockTimeout,
+)
+```
+
 #### Default behavior: raises exception on failure (safe by default):
 
 ```python

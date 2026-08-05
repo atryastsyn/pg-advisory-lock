@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import text
 from sqlalchemy.exc import DataError
 
-from src.pg_advisory_lock.pg_local_setting import pg_get_local_setting, set_lock_timeout
+from pg_advisory_lock.pg_local_setting import pg_get_local_setting, pg_set_local_setting, set_lock_timeout
 
 
 def test_session_remains_usable_when_setting_lock_timeout_fails(session_factory):
@@ -16,26 +16,27 @@ def test_session_remains_usable_when_setting_lock_timeout_fails(session_factory)
 
 
 @pytest.mark.parametrize(
-    argnames='setting_name,setting_value',
+    argnames='setting_name,initial_setting_value,updated_setting_value',
     argvalues=[
-        ('lock_timeout', '275ms'),
-        ('statement_timeout', '5s'),
+        ('lock_timeout', '275ms', '100ms'),
+        ('statement_timeout', '5s', '500ms'),
     ],
 )
-def test_local_setting_restores_its_initial_value(setting_name, setting_value, session_factory):
-    lock_key = 123
+def test_local_setting_restores_its_initial_value(
+    setting_name, initial_setting_value, updated_setting_value, session_factory
+):
     with session_factory() as session:
         session.execute(
             statement=text('SELECT set_config(:name, :value, TRUE)'),
-            params={'name': setting_name, 'value': setting_value},
+            params={'name': setting_name, 'value': initial_setting_value},
         )
 
-        with set_lock_timeout(session=session, timeout='100ms'):
+        with pg_set_local_setting(session=session, name=setting_name, value=updated_setting_value):
             result = session.execute(
                 statement=text('SELECT pg_try_advisory_xact_lock(:key);'),
-                params={'key': lock_key},
+                params={'key': 123},
             ).scalar()
             session.execute(statement=text('SELECT 1;'))
             assert result is True
 
-        assert pg_get_local_setting(session=session, name=setting_name) == setting_value
+        assert pg_get_local_setting(session=session, name=setting_name) == initial_setting_value

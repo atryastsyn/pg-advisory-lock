@@ -4,8 +4,8 @@ import pytest
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import DeclarativeBase
 
-from src.pg_advisory_lock import PgAdvisoryLock, PgAdvisoryLockError
-from src.pg_advisory_lock.lock_arguments import get_key_from_args, normalize, validate
+from pg_advisory_lock import PgAdvisoryLock, PgAdvisoryLockError
+from pg_advisory_lock.lock_arguments import get_key_from_args, normalize, validate
 
 
 class Base(DeclarativeBase): ...

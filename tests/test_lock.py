@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
-from src.pg_advisory_lock import PgAdvisoryLock, PgAdvisoryLockError, PgAdvisoryLockNotAcquired, PgAdvisoryLockTimeout
+from pg_advisory_lock import PgAdvisoryLock, PgAdvisoryLockError, PgAdvisoryLockNotAcquired, PgAdvisoryLockTimeout
 
 
 def test_lock_defaults():
@@ -167,7 +167,7 @@ def test_lock_propagates_exception(raise_on_failure, session_factory):
 
     with (
         session_factory() as session,
-        patch('src.pg_advisory_lock.lock.set_lock_timeout', side_effect=error),
+        patch('pg_advisory_lock.lock.set_lock_timeout', side_effect=error),
         pytest.raises(OperationalError),
     ):
         lock.lock(session=session, timeout_in_ms=1000)
@@ -177,7 +177,7 @@ def test_lock_propagates_exception(raise_on_failure, session_factory):
 def test_lock_handles_timeout_exception(raise_on_failure, session_factory):
     lock = PgAdvisoryLock(['test_lock', 'timeout_exception'], raise_on_failure=raise_on_failure)
     error = OperationalError(statement='SELECT 1', params={}, orig=psycopg.errors.LockNotAvailable())
-    with session_factory() as session, patch('src.pg_advisory_lock.lock.set_lock_timeout', side_effect=error):
+    with session_factory() as session, patch('pg_advisory_lock.lock.set_lock_timeout', side_effect=error):
         if raise_on_failure:
             with pytest.raises(PgAdvisoryLockTimeout):
                 lock.lock(session=session, timeout_in_ms=1000)

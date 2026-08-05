@@ -2,7 +2,6 @@
 
 ## Next
 
-- [ ] Import the installed package instead of src.pg_advisory_lock.
 - [ ] Fix test database configuration and timing flakiness.
 - [ ] Add rollback-release, re-entrancy, and broader SQLSTATE tests.
 - [ ] Fix Ruff source globs and add CI.
