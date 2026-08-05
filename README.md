@@ -138,3 +138,39 @@ string representation, such as `1` and `'1'`, produce the same lock key.
 
 ### Thread safety
 - Each instance should be used within a single database session and transaction.
+
+
+## Development
+
+### Running tests
+Install the project and its development dependencies:
+
+```bash
+poetry install
+```
+
+Start the local PostgreSQL test database and run the test suite:
+
+```bash
+docker compose -f docker/compose.yaml up -d
+poetry run pytest
+```
+
+Tests connect to the following database by default:
+
+```text
+postgresql+psycopg://postgres:123@localhost:6543/testing
+```
+
+Override the database URL when using another PostgreSQL instance:
+
+```bash
+TEST_DATABASE_URL='postgresql+psycopg://user:password@host:5432/database' \
+  poetry run pytest
+```
+
+Stop the local test database when it is no longer needed:
+
+```bash
+docker compose -f docker/compose.yaml down
+```

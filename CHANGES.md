@@ -1,5 +1,26 @@
 # Changelog
 
+All notable changes to PG Advisory Lock are documented in this file.
+
+## [0.0.9] - 2026-08-05
+
+### Added
+
+- Add `TEST_DATABASE_URL` support and development documentation for integration tests.
+- Add reusable session-scoped engine and session factory fixtures and a function-scoped session fixture.
+
+### Changed
+
+- Align the default test database URL with the Docker Compose configuration.
+- Make concurrency tests deterministic using monotonic clocks, explicit synchronization, and
+  `pg_blocking_pids()`.
+
+### Notes
+
+- Integration tests use the local Docker PostgreSQL service by default.
+
+---
+
 ## [0.0.8] - 2026-08-05
 
 ### Added
@@ -66,7 +87,7 @@
 
 - The new serialization format changes generated lock keys compared with previous versions.
 - Values with the same normalized string representation, such as `1` and `'1'`, intentionally share a lock key.
-- PostgreSQL’s signed 64-bit key space retains a theoretical hash-collision risk.
+- PostgreSQL's signed 64-bit key space retains a theoretical hash-collision risk.
 
 ---
 
@@ -103,13 +124,13 @@
 
 ### Added
 
-- Add `psycopg` as DEV dependency.
-- Add test PG instance with Docker Container.
-- Add tests for `lock.py` methods with real SQL Alchemy Session.
+- Add `psycopg` as a development dependency.
+- Add a PostgreSQL test instance using Docker Compose.
+- Add tests for `lock.py` using real SQLAlchemy sessions.
 
 ### Changed
 
-- TODO updated.
+- Update the project priority list.
 
 ### Notes
 
@@ -119,13 +140,13 @@
 
 ### Added
 
-- Add tests for `lock_argumets.py` methods
-- Add test drafts for `lock.py` methods
-- Add facade method to update a `lock_timeout` local setting
+- Add tests for `lock_arguments.py`.
+- Add test drafts for `lock.py`.
+- Add a helper for setting transaction-local `lock_timeout`.
 
 ### Changed
 
-- TODO updated
+- Update the project priority list.
 
 ### Notes
 
@@ -135,14 +156,14 @@
 
 ### Added
 
-- Add a new `PGAdvisoryLock` class to be imported by third-party code.
-- Add new exception classes - `PgAdvisoryLockError` and `PgAdvisoryLockTimeout` to be imported by third-party code.
-- Add new service file - `lock_arguments.py` - to deal with lock arguments
-- Add new service file - `pg_lock_settings.py` - to deal with local settings in the current DB Session
+- Add the public `PGAdvisoryLock` class.
+- Add the public `PgAdvisoryLockError` and `PgAdvisoryLockTimeout` exception classes.
+- Add `lock_arguments.py` for lock-argument handling.
+- Add `pg_local_setting.py` for transaction-local PostgreSQL settings.
 
 ### Changed
 
-- TODO updated
+- Update the project priority list.
 
 ### Notes
 
@@ -158,4 +179,4 @@
 
 ### Notes
 
-- The package `pg-advisory-lock` is all-set now. Ready to evolve
+- Complete the initial `pg-advisory-lock` package scaffolding.

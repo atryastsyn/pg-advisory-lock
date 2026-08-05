@@ -1,23 +1,31 @@
+import os
+
 import pytest
 from sqlalchemy import Column, Integer, MetaData, String, Table, create_engine
 from sqlalchemy.orm import sessionmaker
 
-# Check /docker/compose.yaml file to be sure
-DB_URL = 'postgresql+psycopg://postgres:123@localhost:6543/'
+TEST_DATABASE_URL = os.getenv(
+    'TEST_DATABASE_URL',
+    'postgresql+psycopg://postgres:123@localhost:6543/testing',
+)
 
 
-@pytest.fixture
-def engine_factory():
-    engine = create_engine(DB_URL)
-
+@pytest.fixture(scope='session')
+def engine():
+    engine = create_engine(TEST_DATABASE_URL)
     yield engine
-
     engine.dispose()
 
 
+@pytest.fixture(scope='session')
+def session_factory(engine):
+    return sessionmaker(bind=engine)
+
+
 @pytest.fixture
-def session_factory(engine_factory):
-    return sessionmaker(bind=engine_factory)
+def db_session(session_factory):
+    with session_factory() as session:
+        yield session
 
 
 @pytest.fixture
