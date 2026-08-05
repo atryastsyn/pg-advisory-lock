@@ -1,7 +1,30 @@
 # Changelog
 
-All notable changes to PG Advisory Lock will be documented in this file.
+## [0.0.7] - 2026-08-05
 
+### Added
+
+- Add strict runtime validation for the `raise_on_failure` argument.
+- Add a helper for reading the current value of a PostgreSQL local setting.
+- Add regression coverage for preserving transaction-local PostgreSQL settings.
+- Add validation coverage for supported and unsupported lock arguments.
+
+### Changed
+
+- Preserve the caller's previous `lock_timeout` value after lock acquisition.
+- Restore transaction-local settings to their initial values instead of PostgreSQL defaults.
+- Rename the public `PGAdvisoryLock` class to `PgAdvisoryLock` for consistent Python naming.
+- Centralize lock-argument container validation in the validation helper.
+- Update documentation with boolean validation and `lock_timeout` restoration behavior.
+- Update the project priority list.
+
+### Notes
+
+- Non-boolean `raise_on_failure` values now raise `PgAdvisoryLockError`.
+- `lock()` temporarily changes `lock_timeout` without permanently replacing the caller's existing transaction-local value.
+- The `PgAdvisoryLock` rename changes the public import name from the previous development versions.
+
+---
 
 ## [0.0.6] - 2026-08-04
 

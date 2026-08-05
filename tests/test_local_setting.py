@@ -2,7 +2,7 @@ import pytest
 from sqlalchemy import text
 from sqlalchemy.exc import DataError
 
-from src.pg_advisory_lock.pg_local_setting import set_lock_timeout
+from src.pg_advisory_lock.pg_local_setting import pg_get_local_setting, set_lock_timeout
 
 
 def test_session_remains_usable_when_setting_lock_timeout_fails(session_factory):
@@ -13,3 +13,29 @@ def test_session_remains_usable_when_setting_lock_timeout_fails(session_factory)
             pytest.fail('The context body should not be entered.')
         assert exc_info.value.orig.sqlstate == '22023'  # type: ignore
         assert session.execute(text('SELECT 2')).scalar_one() == 2
+
+
+@pytest.mark.parametrize(
+    argnames='setting_name,setting_value',
+    argvalues=[
+        ('lock_timeout', '275ms'),
+        ('statement_timeout', '5s'),
+    ],
+)
+def test_local_setting_restores_its_initial_value(setting_name, setting_value, session_factory):
+    lock_key = 123
+    with session_factory() as session:
+        session.execute(
+            statement=text('SELECT set_config(:name, :value, TRUE)'),
+            params={'name': setting_name, 'value': setting_value},
+        )
+
+        with set_lock_timeout(session=session, timeout='100ms'):
+            result = session.execute(
+                statement=text('SELECT pg_try_advisory_xact_lock(:key);'),
+                params={'key': lock_key},
+            ).scalar()
+            session.execute(statement=text('SELECT 1;'))
+            assert result is True
+
+        assert pg_get_local_setting(session=session, name=setting_name) == setting_value

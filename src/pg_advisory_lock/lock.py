@@ -9,14 +9,14 @@ from .lock_arguments import get_key_from_args, validate
 from .pg_local_setting import set_lock_timeout
 
 
-class PGAdvisoryLock:
+class PgAdvisoryLock:
     def __init__(self, lock_args: list[Any] | tuple[Any, ...], raise_on_failure: bool = True):
+        if not isinstance(raise_on_failure, bool):
+            raise PgAdvisoryLockError('Raise_on_failure argument must be a bool.')
         self.raise_on_failure = raise_on_failure
 
-        if not isinstance(lock_args, (list, tuple)):
-            raise PgAdvisoryLockError('Lock arguments must be a list or tuple.')
+        validate(lock_args)
         self.lock_args = tuple(lock_args)
-        validate(self.lock_args)
 
         self.lock_key = get_key_from_args(self.lock_args)
 

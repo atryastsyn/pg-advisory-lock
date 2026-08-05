@@ -8,7 +8,10 @@ from sqlalchemy.orm import DeclarativeBase
 from .exceptions import PgAdvisoryLockError
 
 
-def validate(args: tuple[Any, ...]):
+def validate(args: Any):
+    if not isinstance(args, (list, tuple)):
+        raise PgAdvisoryLockError('Lock arguments must be a list or tuple.')
+
     if not args:
         raise PgAdvisoryLockError('At least one lock argument is required.')
 

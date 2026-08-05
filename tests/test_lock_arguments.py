@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import DeclarativeBase
 
-from src.pg_advisory_lock import PGAdvisoryLock, PgAdvisoryLockError
+from src.pg_advisory_lock import PgAdvisoryLock, PgAdvisoryLockError
 from src.pg_advisory_lock.lock_arguments import get_key_from_args, normalize, validate
 
 
@@ -40,10 +40,20 @@ def test_get_key_from_args_order_matters():
     argnames='lock_args, expected_exception, exception_message',
     argvalues=[
         ((1, 2, 3), None, None),
+        ([1, 2, 3], None, None),
+        ({1, 2, 3}, PgAdvisoryLockError, 'Lock arguments must be a list or tuple.'),
+        ({'1': 2}, PgAdvisoryLockError, 'Lock arguments must be a list or tuple.'),
         (tuple(), PgAdvisoryLockError, 'At least one lock argument is required.'),
         ((None, 2, 3), PgAdvisoryLockError, 'Lock argument can not be "None".'),
     ],
-    ids=['No Exception', 'Empty lock arguments list', 'None is not allowed'],
+    ids=[
+        'Tuples are allowed, no exception',
+        'Lists are allowed, no exception',
+        'Sets are not allowed',
+        'Dicts are not allowed',
+        'Empty list is not allowed',
+        'None entry is not allowed',
+    ],
 )
 def test_validate(lock_args, expected_exception, exception_message):
     if expected_exception:
@@ -70,6 +80,12 @@ def test_normalize_other_types(lock_arg, result):
     assert normalize(arg=lock_arg) == result
 
 
+@pytest.mark.parametrize(argnames='raise_on_failure', argvalues=[None, 1, 'True', (False,), {True}, {'False': True}])
+def test_lock_rejects_non_bool_raise_on_failure(raise_on_failure):
+    with pytest.raises(PgAdvisoryLockError):
+        PgAdvisoryLock(lock_args=(1, 2, 3), raise_on_failure=raise_on_failure)
+
+
 @pytest.mark.parametrize(
     'lock_args',
     [
@@ -85,12 +101,12 @@ def test_lock_rejects_non_list_or_tuple_arguments(lock_args):
         PgAdvisoryLockError,
         match='Lock arguments must be a list or tuple.',
     ):
-        PGAdvisoryLock(lock_args)
+        PgAdvisoryLock(lock_args)
 
 
 def test_lock_copies_arguments_to_immutable_tuple():
     lock_args = ['payment']
-    lock = PGAdvisoryLock(lock_args)
+    lock = PgAdvisoryLock(lock_args)
 
     lock_args.append(123)  # type: ignore
 

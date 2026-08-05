@@ -7,24 +7,24 @@ import pytest
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
-from src.pg_advisory_lock import PGAdvisoryLock, PgAdvisoryLockError, PgAdvisoryLockNotAcquired, PgAdvisoryLockTimeout
+from src.pg_advisory_lock import PgAdvisoryLock, PgAdvisoryLockError, PgAdvisoryLockNotAcquired, PgAdvisoryLockTimeout
 
 
 def test_lock_defaults():
-    lock = PGAdvisoryLock(lock_args=['test'])
+    lock = PgAdvisoryLock(lock_args=['test'])
     assert lock.raise_on_failure is True
 
 
 @pytest.mark.parametrize(argnames='raise_on_failure', argvalues=(True, False))
 def test_lock_immediate_success_on_first_try(raise_on_failure, session_factory):
-    lock = PGAdvisoryLock(lock_args=['test_lock', 'lock_immediate', 1], raise_on_failure=raise_on_failure)
+    lock = PgAdvisoryLock(lock_args=['test_lock', 'lock_immediate', 1], raise_on_failure=raise_on_failure)
     with session_factory() as session:
         assert lock.lock_immediate(session=session) is True
 
 
 @pytest.mark.parametrize(argnames='raise_on_failure', argvalues=(True, False))
 def test_lock_success_on_first_try(raise_on_failure, session_factory):
-    lock = PGAdvisoryLock(lock_args=['test_lock', 'lock', 1], raise_on_failure=raise_on_failure)
+    lock = PgAdvisoryLock(lock_args=['test_lock', 'lock', 1], raise_on_failure=raise_on_failure)
     with session_factory() as session:
         assert lock.lock(session=session) is True
 
@@ -37,10 +37,10 @@ def test_lock_immediate_fails_when_already_locked(raise_on_failure, session_fact
     with session_factory() as session1, session_factory() as session2:
         # First session acquires the lock
         with session1.begin():
-            lock1 = PGAdvisoryLock(lock_args)
+            lock1 = PgAdvisoryLock(lock_args)
             assert lock1.lock_immediate(session=session1) is True
 
-            lock2 = PGAdvisoryLock(lock_args, raise_on_failure=raise_on_failure)
+            lock2 = PgAdvisoryLock(lock_args, raise_on_failure=raise_on_failure)
             if raise_on_failure:
                 with pytest.raises(PgAdvisoryLockNotAcquired):
                     lock2.lock_immediate(session=session2)
@@ -53,7 +53,7 @@ def test_lock_immediate_fails_when_already_locked(raise_on_failure, session_fact
 
 @pytest.mark.parametrize(argnames='raise_on_failure', argvalues=(True, False))
 def test_lock_immediate_success_after_transaction_ends(raise_on_failure, session_factory):
-    lock = PGAdvisoryLock(lock_args=['test_lock', 'success_after_commit', 1], raise_on_failure=raise_on_failure)
+    lock = PgAdvisoryLock(lock_args=['test_lock', 'success_after_commit', 1], raise_on_failure=raise_on_failure)
 
     with session_factory() as session:
         with session.begin():
@@ -69,7 +69,7 @@ def test_lock_immediate_success_after_transaction_ends(raise_on_failure, session
 
 @pytest.mark.parametrize(argnames='raise_on_failure', argvalues=(True, False))
 def test_lock_success_after_transaction_ends(raise_on_failure, session_factory):
-    lock = PGAdvisoryLock(lock_args=['test_lock', 'success_after_commit'], raise_on_failure=raise_on_failure)
+    lock = PgAdvisoryLock(lock_args=['test_lock', 'success_after_commit'], raise_on_failure=raise_on_failure)
     # First transaction acquires and releases lock
     with session_factory() as session:
         with session.begin():
@@ -84,8 +84,8 @@ def test_lock_success_after_transaction_ends(raise_on_failure, session_factory):
 @pytest.mark.parametrize(argnames='raise_on_failure', argvalues=(True, False))
 def test_lock_immediate_with_different_keys_succeeds(raise_on_failure, session_factory):
     with session_factory() as session, session.begin():
-        lock1 = PGAdvisoryLock(lock_args=['test_lock', 'key1'], raise_on_failure=raise_on_failure)
-        lock2 = PGAdvisoryLock(lock_args=['test_lock', 'key2'], raise_on_failure=raise_on_failure)
+        lock1 = PgAdvisoryLock(lock_args=['test_lock', 'key1'], raise_on_failure=raise_on_failure)
+        lock2 = PgAdvisoryLock(lock_args=['test_lock', 'key2'], raise_on_failure=raise_on_failure)
         assert lock1.lock_immediate(session=session) is True
         assert lock2.lock_immediate(session=session) is True
 
@@ -93,15 +93,15 @@ def test_lock_immediate_with_different_keys_succeeds(raise_on_failure, session_f
 @pytest.mark.parametrize(argnames='raise_on_failure', argvalues=(True, False))
 def test_lock_with_different_keys_succeeds(raise_on_failure, session_factory):
     with session_factory() as session, session.begin():
-        lock1 = PGAdvisoryLock(lock_args=['test_lock', 'key1'], raise_on_failure=raise_on_failure)
-        lock2 = PGAdvisoryLock(lock_args=['test_lock', 'key2'], raise_on_failure=raise_on_failure)
+        lock1 = PgAdvisoryLock(lock_args=['test_lock', 'key1'], raise_on_failure=raise_on_failure)
+        lock2 = PgAdvisoryLock(lock_args=['test_lock', 'key2'], raise_on_failure=raise_on_failure)
         assert lock1.lock(session=session) is True
         assert lock2.lock(session=session) is True
 
 
 @pytest.mark.parametrize(argnames='timeout_value', argvalues=[-1, '1000'])
 def test_lock_timeout_validation(timeout_value, session_factory):
-    lock = PGAdvisoryLock(['test_lock', 'validation'])
+    lock = PgAdvisoryLock(['test_lock', 'validation'])
 
     # Test negative timeout raises ValueError
     with (
@@ -112,7 +112,7 @@ def test_lock_timeout_validation(timeout_value, session_factory):
 
 
 def test_lock_zero_timeout_calls_lock_immediate(session_factory):
-    lock = PGAdvisoryLock(lock_args=['test_lock', 'zero_timeout'])
+    lock = PgAdvisoryLock(lock_args=['test_lock', 'zero_timeout'])
 
     # Mock lock_immediate to verify it's called
     with session_factory() as session, patch.object(lock, 'lock_immediate', return_value=True) as mock_lock_immediate:
@@ -123,13 +123,13 @@ def test_lock_zero_timeout_calls_lock_immediate(session_factory):
 @pytest.mark.parametrize(argnames='raise_on_failure', argvalues=(True, False))
 def test_lock_success_with_timeout(raise_on_failure, session_factory):
     with session_factory() as session, session.begin():
-        lock = PGAdvisoryLock(lock_args=['test_lock', 'success_with_timeout'], raise_on_failure=raise_on_failure)
+        lock = PgAdvisoryLock(lock_args=['test_lock', 'success_with_timeout'], raise_on_failure=raise_on_failure)
         assert lock.lock(session=session, timeout_in_ms=500) is True
 
 
 @pytest.mark.parametrize(argnames='raise_on_failure', argvalues=(True, False))
 def test_lock_success_with_default_timeout(raise_on_failure, session_factory):
-    locker = PGAdvisoryLock(lock_args=['test_lock', 'default_timeout'], raise_on_failure=raise_on_failure)
+    locker = PgAdvisoryLock(lock_args=['test_lock', 'default_timeout'], raise_on_failure=raise_on_failure)
     # Test default timeout (1000ms)
     with session_factory() as session, session.begin():
         assert locker.lock(session=session) is True
@@ -142,11 +142,11 @@ def test_lock_timeout_when_already_locked(raise_on_failure, session_factory):
     # Create two separate sessions for true concurrency
     with session_factory() as session1, session_factory() as session2:
         # First session acquires the lock
-        lock1 = PGAdvisoryLock(lock_args)
+        lock1 = PgAdvisoryLock(lock_args)
         assert lock1.lock(session=session1, timeout_in_ms=100) is True
 
         # Second session behavior depends on raise_on_failure parameter
-        lock2 = PGAdvisoryLock(lock_args, raise_on_failure=raise_on_failure)
+        lock2 = PgAdvisoryLock(lock_args, raise_on_failure=raise_on_failure)
 
         if raise_on_failure:  # Should raise exception
             with pytest.raises(PgAdvisoryLockTimeout):
@@ -162,7 +162,7 @@ def test_lock_timeout_when_already_locked(raise_on_failure, session_factory):
 
 @pytest.mark.parametrize(argnames='raise_on_failure', argvalues=(False, True))
 def test_lock_propagates_exception(raise_on_failure, session_factory):
-    lock = PGAdvisoryLock(['test_lock', 'timeout_exception'], raise_on_failure=raise_on_failure)
+    lock = PgAdvisoryLock(['test_lock', 'timeout_exception'], raise_on_failure=raise_on_failure)
     error = OperationalError(statement='SELECT 1', params={}, orig=psycopg.errors.ConnectionFailure())
 
     with (
@@ -175,7 +175,7 @@ def test_lock_propagates_exception(raise_on_failure, session_factory):
 
 @pytest.mark.parametrize(argnames='raise_on_failure', argvalues=(False, True))
 def test_lock_handles_timeout_exception(raise_on_failure, session_factory):
-    lock = PGAdvisoryLock(['test_lock', 'timeout_exception'], raise_on_failure=raise_on_failure)
+    lock = PgAdvisoryLock(['test_lock', 'timeout_exception'], raise_on_failure=raise_on_failure)
     error = OperationalError(statement='SELECT 1', params={}, orig=psycopg.errors.LockNotAvailable())
     with session_factory() as session, patch('src.pg_advisory_lock.lock.set_lock_timeout', side_effect=error):
         if raise_on_failure:
@@ -230,7 +230,7 @@ def test_lock_waits_for_first_transaction_then_succeeds(raise_on_failure, sessio
         """Thread 1: Get lock → wait for thread 2 to start trying → release lock"""
         session = session_factory()
         try:
-            lock = PGAdvisoryLock(lock_args=lock_args, raise_on_failure=raise_on_failure)
+            lock = PgAdvisoryLock(lock_args=lock_args, raise_on_failure=raise_on_failure)
             result = lock.lock_immediate(session=session)
             results['first_acquired'] = result
             results['first_acquire_time'] = time.time()
@@ -263,7 +263,7 @@ def test_lock_waits_for_first_transaction_then_succeeds(raise_on_failure, sessio
             # Small delay to ensure we're definitely trying while first holds lock
             time.sleep(0.05)
 
-            lock = PGAdvisoryLock(lock_args=lock_args, raise_on_failure=raise_on_failure)
+            lock = PgAdvisoryLock(lock_args=lock_args, raise_on_failure=raise_on_failure)
             results['second_start_time'] = time.time()
 
             # 🚦 SIGNAL: "I'm about to try getting the lock!"
@@ -332,8 +332,8 @@ def test_lock_timeout_returning_false_keeps_transaction_usable(session_factory):
         holder_session.begin(),
         contender_session.begin(),
     ):
-        holder = PGAdvisoryLock(lock_args)
-        contender = PGAdvisoryLock(lock_args, raise_on_failure=False)
+        holder = PgAdvisoryLock(lock_args)
+        contender = PgAdvisoryLock(lock_args, raise_on_failure=False)
 
         assert holder.lock_immediate(session=holder_session) is True
         acquired = contender.lock(session=contender_session, timeout_in_ms=20)
@@ -353,8 +353,8 @@ def test_lock_timeout_exception_keeps_transaction_usable(session_factory):
         holder_session.begin(),
         contender_session.begin(),
     ):
-        holder = PGAdvisoryLock(lock_args)
-        contender = PGAdvisoryLock(lock_args)
+        holder = PgAdvisoryLock(lock_args)
+        contender = PgAdvisoryLock(lock_args)
 
         assert holder.lock_immediate(session=holder_session) is True
         with pytest.raises(PgAdvisoryLockTimeout):

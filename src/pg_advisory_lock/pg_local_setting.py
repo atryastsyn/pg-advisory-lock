@@ -1,18 +1,28 @@
 from contextlib import contextmanager
+from typing import Any
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 
+def pg_get_local_setting(session: Session, name: str) -> Any:
+    return session.execute(statement=text('SELECT current_setting(:name)'), params={'name': name}).scalar_one()
+
+
 @contextmanager
-def pg_set_local_setting(session: Session, name: str, value: int | str):
+def pg_set_local_setting(session: Session, name: str, value: str):
+    # Get the current value
+    current_value = pg_get_local_setting(session=session, name=name)
+
+    # Set the new value
     session.execute(text('SELECT set_config(:name, :value, TRUE)'), {'name': name, 'value': value})
 
     yield
 
-    session.execute(text(f'SET LOCAL {name} = DEFAULT'))
+    # Restore initial value
+    session.execute(text('SELECT set_config(:name, :value, TRUE)'), {'name': name, 'value': current_value})
 
 
-def set_lock_timeout(session: Session, timeout: int | str):
+def set_lock_timeout(session: Session, timeout: str):
     setting_name = 'lock_timeout'
     return pg_set_local_setting(session=session, name=setting_name, value=timeout)

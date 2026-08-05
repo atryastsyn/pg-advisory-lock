@@ -26,6 +26,8 @@ automatically released when the transaction commits or rolls back.
   - Both methods return `False` for expected contention or timeout.
 - Unexpected database and infrastructure errors are always propagated.
 
+`raise_on_failure` must be a boolean. Other values raise `PgAdvisoryLockError`.
+
 `PgAdvisoryLockTimeout` is a subclass of `PgAdvisoryLockNotAcquired`.
 
 
@@ -33,7 +35,7 @@ automatically released when the transaction commits or rolls back.
 #### Default behavior: raises exception on failure (safe by default):
 
 ```python
-locker = PGAdvisoryLock(lock_args=[UserModel, user_id])
+locker = PgAdvisoryLock(lock_args=[UserModel, user_id])
 
 with session.begin():
     locker.lock(session=session)
@@ -44,7 +46,7 @@ with session.begin():
 #### Boolean mode: explicit handling of lock contention:
 
 ```python
-locker = PGAdvisoryLock(lock_args=[UserModel, user_id], raise_on_failure=False)
+locker = PgAdvisoryLock(lock_args=[UserModel, user_id], raise_on_failure=False)
 
 with session.begin():
     if locker.lock(session=session, timeout_in_ms=5000):
@@ -57,7 +59,7 @@ with session.begin():
 #### Immediate (non-blocking) attempts:
 
 ```python
-locker = PGAdvisoryLock(
+locker = PgAdvisoryLock(
     lock_args=['payment_processing', order_id],
     raise_on_failure=False,
 )
@@ -73,7 +75,7 @@ with session.begin():
 #### Lock on multiple components:
 
 ```python
-locker = PGAdvisoryLock(lock_args=['user_sync', region, user_id])
+locker = PgAdvisoryLock(lock_args=['user_sync', region, user_id])
 
 with session.begin():
     locker.lock(session=session)
@@ -89,6 +91,10 @@ When `lock()` reaches its timeout, the failed PostgreSQL statement is isolated w
 a savepoint. After `False` is returned or `PgAdvisoryLockTimeout` is caught, the caller's
 outer transaction remains usable.
 
+`lock()` temporarily changes the transaction-local PostgreSQL `lock_timeout`. After a
+successful acquisition or handled timeout, the caller's previous `lock_timeout` value
+is restored.
+
 A connection or infrastructure failure cannot be repaired by a savepoint and is
 propagated to the caller.
 
@@ -102,8 +108,8 @@ to the original list do not affect the lock identity.
 For a lock with one component, wrap the value in a list or one-element tuple:
 
 ```python
-PGAdvisoryLock(lock_args=['payment_processing'])
-PGAdvisoryLock(lock_args=('payment_processing',))
+PgAdvisoryLock(lock_args=['payment_processing'])
+PgAdvisoryLock(lock_args=('payment_processing',))
 ```
 
 Lock components are normalized as follows:
