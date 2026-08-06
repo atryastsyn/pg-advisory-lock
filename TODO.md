@@ -2,7 +2,6 @@
 
 ## Next
 
-- [ ] Add rollback-release, re-entrancy, and broader SQLSTATE tests.
 - [ ] Fix Ruff source globs and add CI.
 - [ ] Complete typing, docstrings, logging, and package metadata.
 

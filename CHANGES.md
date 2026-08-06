@@ -2,6 +2,23 @@
 
 All notable changes to PG Advisory Lock are documented in this file.
 
+## [0.0.10] - 2026-08-06
+
+### Added
+
+- Add regression tests for re-entrant acquisition and lock release after rollback.
+- Add SQLSTATE classification coverage for contention and unrelated database errors.
+
+### Changed
+
+- Update the package version and project priority list.
+
+### Notes
+
+- This release expands test coverage without changing runtime behavior.
+
+---
+
 ## [0.0.9] - 2026-08-05
 
 ### Added

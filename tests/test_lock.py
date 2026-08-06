@@ -22,9 +22,25 @@ def test_lock_immediate_success_on_first_try(raise_on_failure, db_session):
 
 
 @pytest.mark.parametrize(argnames='raise_on_failure', argvalues=(True, False))
+def test_lock_immediate_success_on_reentry(raise_on_failure, db_session):
+    lock = PgAdvisoryLock(lock_args=['test_lock', 'lock_immediate', 1], raise_on_failure=raise_on_failure)
+    with db_session.begin():
+        assert lock.lock_immediate(session=db_session) is True
+        assert lock.lock_immediate(session=db_session) is True
+
+
+@pytest.mark.parametrize(argnames='raise_on_failure', argvalues=(True, False))
 def test_lock_success_on_first_try(raise_on_failure, db_session):
     lock = PgAdvisoryLock(lock_args=['test_lock', 'lock', 1], raise_on_failure=raise_on_failure)
     assert lock.lock(session=db_session) is True
+
+
+@pytest.mark.parametrize(argnames='raise_on_failure', argvalues=(True, False))
+def test_lock_success_on_reentry(raise_on_failure, db_session):
+    lock = PgAdvisoryLock(lock_args=['test_lock', 'lock', 1], raise_on_failure=raise_on_failure)
+    with db_session.begin():
+        assert lock.lock(session=db_session) is True
+        assert lock.lock(session=db_session) is True
 
 
 @pytest.mark.parametrize(argnames='raise_on_failure', argvalues=(True, False))
@@ -318,3 +334,34 @@ def test_lock_timeout_exception_keeps_transaction_usable(session_factory):
             contender.lock(session=contender_session, timeout_in_ms=20)
         query_result = contender_session.execute(text('SELECT 1')).scalar_one()
         assert query_result == 1
+
+
+def test_lock_immediate_released_after_rollback(session_factory):
+    with session_factory() as holder_session, session_factory() as contender_session:
+        lock_args = ('release', 'rollback', 'lock', 'immediate')
+        holder_lock = PgAdvisoryLock(lock_args=lock_args)
+        contender_lock = PgAdvisoryLock(lock_args=lock_args, raise_on_failure=False)
+
+        holder_session.begin()
+
+        assert holder_lock.lock_immediate(session=holder_session) is True
+        assert contender_lock.lock_immediate(session=contender_session) is False
+
+        holder_session.rollback()
+
+        assert contender_lock.lock_immediate(session=contender_session) is True
+
+
+def test_lock_released_after_rollback(session_factory):
+    with session_factory() as holder_session, session_factory() as contender_session:
+        lock_args = ('release', 'rollback', 'lock', 'blocking')
+        holder_lock = PgAdvisoryLock(lock_args=lock_args)
+        contender_lock = PgAdvisoryLock(lock_args=lock_args, raise_on_failure=False)
+
+        holder_session.begin()
+
+        assert holder_lock.lock(session=holder_session) is True
+        assert contender_lock.lock(session=contender_session, timeout_in_ms=100) is False
+
+        holder_session.rollback()
+        assert contender_lock.lock(session=contender_session, timeout_in_ms=100) is True
