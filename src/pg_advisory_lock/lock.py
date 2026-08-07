@@ -10,7 +10,7 @@ from .pg_local_setting import set_lock_timeout
 
 
 class PgAdvisoryLock:
-    def __init__(self, lock_args: list[Any] | tuple[Any, ...], raise_on_failure: bool = True):
+    def __init__(self, lock_args: list[Any] | tuple[Any, ...], raise_on_failure: bool = True) -> None:
         if not isinstance(raise_on_failure, bool):
             raise PgAdvisoryLockError('Raise_on_failure argument must be a bool.')
         self.raise_on_failure = raise_on_failure

@@ -2,7 +2,7 @@
 
 ## Next
 
-- [ ] Complete typing, docstrings, logging, and package metadata.
+- [ ] Complete docstrings, logging, and package metadata.
 
 ## Backlog
 
@@ -11,4 +11,3 @@
 ## Ideas
 
 - [ ] Get the `statement_timeout` and make sure `lock_timeout` is less or equal
-- [ ] Do I need `psycopg` be package dependency or just DEV?

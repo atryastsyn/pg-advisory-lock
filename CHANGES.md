@@ -2,6 +2,25 @@
 
 All notable changes to PG Advisory Lock are documented in this file.
 
+## [0.0.12] - 2026-08-07
+
+### Added
+
+- Add a `py.typed` marker so type checkers honor the package's inline annotations.
+- Add strict mypy checking for the package source and a CI type-check step.
+
+### Changed
+
+- Complete missing return annotations, including the transaction-local setting context managers.
+- Replace type suppressions in SQLSTATE classification with defensive attribute lookups.
+- Update the package version and project priority list.
+
+### Notes
+
+- Published annotations are now part of the public contract and are enforced on every push.
+
+---
+
 ## [0.0.11] - 2026-08-06
 
 ### Added

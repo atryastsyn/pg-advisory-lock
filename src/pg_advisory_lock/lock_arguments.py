@@ -8,7 +8,7 @@ from sqlalchemy.orm import DeclarativeBase
 from .exceptions import PgAdvisoryLockError
 
 
-def validate(args: Any):
+def validate(args: Any) -> None:
     if not isinstance(args, (list, tuple)):
         raise PgAdvisoryLockError('Lock arguments must be a list or tuple.')
 
@@ -22,7 +22,7 @@ def validate(args: Any):
 
 def normalize(arg: Any) -> str:
     if isinstance(arg, DeclarativeBase):  # SQL Alchemy Model
-        return arg.__tablename__
+        return str(arg.__tablename__)
     elif isinstance(arg, Table):  # SQL Alchemy Table
         return arg.name
     else:

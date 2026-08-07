@@ -43,6 +43,19 @@
             }
         },
         {
+            "label": "mypy-check",
+            "type": "shell",
+            "command": "poetry run mypy",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true
+            }
+        },
+        {
             "label": "go-to-master",
             "type": "shell",
             "command": "git checkout master && git fetch && git pull",
