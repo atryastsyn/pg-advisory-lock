@@ -2,6 +2,23 @@
 
 All notable changes to PG Advisory Lock are documented in this file.
 
+## [0.0.11] - 2026-08-06
+
+### Added
+
+- Add Gitea Actions CI for linting, formatting, PostgreSQL-backed tests, and package builds.
+
+### Changed
+
+- Expand Ruff test discovery to include nested test directories.
+- Update the package version and project priority list.
+
+### Notes
+
+- CI runs for pushes and pull requests using a health-checked PostgreSQL service.
+
+---
+
 ## [0.0.10] - 2026-08-06
 
 ### Added

@@ -2,7 +2,6 @@
 
 ## Next
 
-- [ ] Fix Ruff source globs and add CI.
 - [ ] Complete typing, docstrings, logging, and package metadata.
 
 ## Backlog
