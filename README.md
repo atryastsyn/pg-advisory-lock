@@ -8,12 +8,13 @@ automatically released when the transaction commits or rolls back.
 
 
 ### Key features:
-- Flexible lock key generation from various argument types (models, tables, strings, etc.)
+- Flexible lock key generation from various argument types (model instances, tables, strings, etc.)
 - Non-blocking immediate lock acquisition
 - Blocking lock acquisition with configurable timeout
 - Automatic lock release on transaction end (uses pg_advisory_xact_lock functions)
 - Configurable handling for expected lock contention: raise exceptions (default) or return a boolean
 - Database and infrastructure errors are propagated unchanged
+- Inline type hints shipped with the package (PEP 561)
 
 
 ### Failure handling
@@ -29,6 +30,9 @@ automatically released when the transaction commits or rolls back.
 `raise_on_failure` must be a boolean. Other values raise `PgAdvisoryLockError`.
 
 `PgAdvisoryLockTimeout` is a subclass of `PgAdvisoryLockNotAcquired`.
+
+Boolean mode discards the originating database error. Use the default exception mode when the
+cause matters: the underlying `DBAPIError` is chained as `__cause__`.
 
 
 ### Usage examples:
@@ -46,7 +50,7 @@ from pg_advisory_lock import (
 #### Default behavior: raises exception on failure (safe by default):
 
 ```python
-locker = PgAdvisoryLock(lock_args=[UserModel, user_id])
+locker = PgAdvisoryLock(lock_args=[UserModel.__table__, user_id])
 
 with session.begin():
     locker.lock(session=session)
@@ -57,7 +61,7 @@ with session.begin():
 #### Boolean mode: explicit handling of lock contention:
 
 ```python
-locker = PgAdvisoryLock(lock_args=[UserModel, user_id], raise_on_failure=False)
+locker = PgAdvisoryLock(lock_args=[UserModel.__table__, user_id], raise_on_failure=False)
 
 with session.begin():
     if locker.lock(session=session, timeout_in_ms=5000):
@@ -125,8 +129,20 @@ PgAdvisoryLock(lock_args=('payment_processing',))
 
 Lock components are normalized as follows:
 
-- SQLAlchemy models and tables → table name
-- Other supported objects → string representation
+- SQLAlchemy model instances and `Table` objects → table name
+- Everything else → string representation
+
+Only instances of a `DeclarativeBase` subclass are recognized as models. A model class, or a model
+built on the legacy `declarative_base()`, is not recognized and falls through to its string
+representation, which is not stable across processes. Pass `Model.__table__` in those cases.
+
+A model instance contributes only its table name, so the row identity must be passed as its own
+component:
+
+```python
+user = session.get(UserModel, user_id)
+locker = PgAdvisoryLock(lock_args=[user, user.id])
+```
 
 The normalized strings are serialized as a compact JSON array, preserving component
 boundaries even when values contain separators. The serialized value is hashed with
@@ -137,7 +153,9 @@ string representation, such as `1` and `'1'`, produce the same lock key.
 
 
 ### Thread safety
-- Each instance should be used within a single database session and transaction.
+- An instance keeps no state after construction and can be shared across sessions and threads.
+- Each thread needs its own `Session`; SQLAlchemy sessions are not thread-safe.
+- A single acquisition belongs to the session and transaction that made it.
 
 
 ## Development
@@ -174,3 +192,8 @@ Stop the local test database when it is no longer needed:
 ```bash
 docker compose -f docker/compose.yaml down
 ```
+
+
+## License
+
+MIT. See [LICENSE](LICENSE).

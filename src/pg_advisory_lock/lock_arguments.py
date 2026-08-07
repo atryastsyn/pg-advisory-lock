@@ -1,3 +1,5 @@
+"""Validation and deterministic key derivation for advisory-lock arguments."""
+
 import hashlib
 import json
 from typing import Any
@@ -9,6 +11,13 @@ from .exceptions import PgAdvisoryLockError
 
 
 def validate(args: Any) -> None:
+    """Enforce the lock-argument contract before a key is derived.
+
+    Only lists and tuples are accepted. Bare strings, sets, mappings, and generators are rejected
+    because they iterate per character, have no stable order, or would be consumed on first use.
+    None is rejected because it cannot be told apart from the string 'None'.
+    """
+
     if not isinstance(args, (list, tuple)):
         raise PgAdvisoryLockError('Lock arguments must be a list or tuple.')
 
@@ -21,9 +30,19 @@ def validate(args: Any) -> None:
 
 
 def normalize(arg: Any) -> str:
-    if isinstance(arg, DeclarativeBase):  # SQL Alchemy Model
+    """Reduce one lock component to the string used for key derivation.
+
+    DeclarativeBase instances and Table objects collapse to their table name, so both address the
+    same lock. Every other value uses its string representation, which makes normalization
+    deliberately type-insensitive: 1 and '1' yield the same component.
+
+    Model classes and legacy declarative_base() models are not recognized and fall through to that
+    string representation, which is not stable across processes. Pass Model.__table__ instead.
+    """
+
+    if isinstance(arg, DeclarativeBase):
         return str(arg.__tablename__)
-    elif isinstance(arg, Table):  # SQL Alchemy Table
+    elif isinstance(arg, Table):
         return arg.name
     else:
         return str(arg)

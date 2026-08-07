@@ -2,6 +2,27 @@
 
 All notable changes to PG Advisory Lock are documented in this file.
 
+## [0.0.13] - 2026-08-07
+
+### Added
+
+- Add an MIT `LICENSE`, shipped inside the built distributions.
+- Add package metadata: license, keywords, and classifiers.
+- Document every module, class, and public function with docstrings.
+
+### Changed
+
+- Document that only `DeclarativeBase` instances and `Table` objects normalize to a table name, and pass
+  `Model.__table__` in the README examples.
+- Clarify the README thread-safety guarantee and note the chained `__cause__` in boolean mode.
+- Update the package version and project priority list.
+
+### Notes
+
+- Recognizing model classes in `normalize` stays open and is tracked in `TODO.md`.
+
+---
+
 ## [0.0.12] - 2026-08-07
 
 ### Added

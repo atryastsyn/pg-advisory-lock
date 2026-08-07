@@ -2,7 +2,7 @@
 
 ## Next
 
-- [ ] Complete docstrings, logging, and package metadata.
+- [ ] Recognize model classes and legacy `declarative_base()` models in `normalize`.
 
 ## Backlog
 
