@@ -1,6 +1,6 @@
 # pg-advisory-lock
 
-## Pythonic PostgreSQL advisory locking for SQLAlchemy, with flexible keys and explicit contention handling.
+## Pythonic PostgreSQL advisory locking for SQLAlchemy, with structured keys and explicit contention handling.
 
 Provides a high-level interface for acquiring PostgreSQL advisory locks with structured
 lock arguments and timeout support. Advisory locks are application-level locks that are
@@ -8,7 +8,7 @@ automatically released when the transaction commits or rolls back.
 
 
 ### Key features:
-- Flexible lock key generation from various argument types (model instances, tables, strings, etc.)
+- Deterministic lock keys composed from `str`, `int`, and `uuid.UUID` components
 - Non-blocking immediate lock acquisition
 - Blocking lock acquisition with configurable timeout
 - Automatic lock release on transaction end (uses pg_advisory_xact_lock functions)
@@ -50,7 +50,7 @@ from pg_advisory_lock import (
 #### Default behavior: raises exception on failure (safe by default):
 
 ```python
-locker = PgAdvisoryLock(lock_args=[UserModel.__table__, user_id])
+locker = PgAdvisoryLock(lock_args=[UserModel.__table__.name, user_id])
 
 with session.begin():
     locker.lock(session=session)
@@ -61,7 +61,7 @@ with session.begin():
 #### Boolean mode: explicit handling of lock contention:
 
 ```python
-locker = PgAdvisoryLock(lock_args=[UserModel.__table__, user_id], raise_on_failure=False)
+locker = PgAdvisoryLock(lock_args=[UserModel.__table__.name, user_id], raise_on_failure=False)
 
 with session.begin():
     if locker.lock(session=session, timeout_in_ms=5000):
@@ -115,7 +115,7 @@ propagated to the caller.
 
 ### Lock arguments and key generation
 `lock_args` must be a non-empty list or tuple. A bare string, set, mapping, generator,
-or other iterable is rejected. Each component must be non-`None`.
+or other iterable is rejected.
 
 The arguments are copied to an immutable tuple during construction, so later changes
 to the original list do not affect the lock identity.
@@ -127,22 +127,21 @@ PgAdvisoryLock(lock_args=['payment_processing'])
 PgAdvisoryLock(lock_args=('payment_processing',))
 ```
 
-Lock components are normalized as follows:
+Each component must be a `str`, `int`, or `uuid.UUID`. Any other type, including `None`, SQLAlchemy
+model instances, model classes, and `Table` objects, raises `PgAdvisoryLockError` at construction.
 
-- SQLAlchemy model instances and `Table` objects → table name
-- Everything else → string representation
+The restriction exists because a value relying on Python's default `repr` stringifies with a memory
+address that differs in every process. Hashing one would derive a key that never matches another
+process, so the lock would appear granted while excluding nobody.
 
-Only instances of a `DeclarativeBase` subclass are recognized as models. A model class, or a model
-built on the legacy `declarative_base()`, is not recognized and falls through to its string
-representation, which is not stable across processes. Pass `Model.__table__` in those cases.
-
-A model instance contributes only its table name, so the row identity must be passed as its own
-component:
+Pass the table name explicitly:
 
 ```python
-user = session.get(UserModel, user_id)
-locker = PgAdvisoryLock(lock_args=[user, user.id])
+locker = PgAdvisoryLock(lock_args=[UserModel.__table__.name, user.id])
 ```
+
+`__table__.name` avoids duplicating the table name in application code. Note that renaming the table
+changes the derived key, whereas a string literal would not.
 
 The normalized strings are serialized as a compact JSON array, preserving component
 boundaries even when values contain separators. The serialized value is hashed with

@@ -2,6 +2,29 @@
 
 All notable changes to PG Advisory Lock are documented in this file.
 
+## [0.0.14] - 2026-08-10
+
+### Changed
+
+- Restrict lock components to `str`, `int`, and `UUID`; any other type is rejected at construction.
+- Reduce `normalize` to a plain string conversion, so key derivation no longer imports SQLAlchemy.
+- Update the package version, project priority list, and the key wording in the README and package
+  description.
+
+### Removed
+
+- Remove the table-name normalization of `DeclarativeBase` instances and `Table` objects.
+
+### Notes
+
+- Breaking change: `lock_args` holding a model instance or a `Table` now raises `PgAdvisoryLockError` at
+  construction instead of deriving a key. A value relying on the default `repr` embedded a memory address
+  and derived a different key in every process, granting a lock that excluded nobody.
+- The migration preserves keys: `[UserModel.__table__.name, user.id]` derives what `[user, user.id]` did,
+  so old and new processes keep excluding each other during a rolling deploy.
+
+---
+
 ## [0.0.13] - 2026-08-07
 
 ### Added

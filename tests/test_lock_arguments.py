@@ -1,21 +1,9 @@
 from decimal import Decimal
 
 import pytest
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import DeclarativeBase
 
 from pg_advisory_lock import PgAdvisoryLock, PgAdvisoryLockError
-from pg_advisory_lock.lock_arguments import get_key_from_args, normalize, validate
-
-
-class Base(DeclarativeBase): ...
-
-
-class UserModel(Base):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    first_name = Column(String(100), nullable=False)
-    last_name = Column(String(100), nullable=False)
+from pg_advisory_lock.lock_arguments import LOCK_ARGUMENT_TYPE_NAMES, get_key_from_args, normalize, validate
 
 
 def test_get_key_from_args_deterministic_same_args():
@@ -45,6 +33,21 @@ def test_get_key_from_args_order_matters():
         ({'1': 2}, PgAdvisoryLockError, 'Lock arguments must be a list or tuple.'),
         (tuple(), PgAdvisoryLockError, 'At least one lock argument is required.'),
         ((None, 2, 3), PgAdvisoryLockError, 'Lock argument can not be "None".'),
+        (
+            (Decimal('1.0'),),
+            PgAdvisoryLockError,
+            f'Lock argument must be one of "{LOCK_ARGUMENT_TYPE_NAMES}", got "Decimal" instead.',
+        ),
+        (
+            (object(),),
+            PgAdvisoryLockError,
+            f'Lock argument must be one of "{LOCK_ARGUMENT_TYPE_NAMES}", got "object" instead.',
+        ),
+        (
+            (float(1),),
+            PgAdvisoryLockError,
+            f'Lock argument must be one of "{LOCK_ARGUMENT_TYPE_NAMES}", got "float" instead.',
+        ),
     ],
     ids=[
         'Tuples are allowed, no exception',
@@ -53,6 +56,9 @@ def test_get_key_from_args_order_matters():
         'Dicts are not allowed',
         'Empty list is not allowed',
         'None entry is not allowed',
+        'Decimal entry is not allowed',
+        'Object entry is not allowed',
+        'Float entry is not allowed',
     ],
 )
 def test_validate(lock_args, expected_exception, exception_message):
@@ -61,15 +67,6 @@ def test_validate(lock_args, expected_exception, exception_message):
             validate(args=lock_args)
     else:
         validate(args=lock_args)
-
-
-def test_normalize_model():
-    user_model = UserModel(id=1, first_name='Alex', last_name='Tryastsyn')
-    assert normalize(arg=user_model) == user_model.__tablename__
-
-
-def test_normalize_table(test_table):
-    assert normalize(arg=test_table) == test_table.name
 
 
 @pytest.mark.parametrize(

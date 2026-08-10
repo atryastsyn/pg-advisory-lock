@@ -2,8 +2,6 @@
 
 ## Next
 
-- [ ] Recognize model classes and legacy `declarative_base()` models in `normalize`.
-
 ## Backlog
 
 - [ ] Docs

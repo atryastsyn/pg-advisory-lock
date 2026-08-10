@@ -2,12 +2,13 @@
 
 import hashlib
 import json
+import uuid
 from typing import Any
 
-from sqlalchemy import Table
-from sqlalchemy.orm import DeclarativeBase
-
 from .exceptions import PgAdvisoryLockError
+
+LOCK_ARGUMENT_TYPES: tuple[type, ...] = (str, int, uuid.UUID)
+LOCK_ARGUMENT_TYPE_NAMES = ', '.join([_.__name__ for _ in LOCK_ARGUMENT_TYPES])
 
 
 def validate(args: Any) -> None:
@@ -16,6 +17,11 @@ def validate(args: Any) -> None:
     Only lists and tuples are accepted. Bare strings, sets, mappings, and generators are rejected
     because they iterate per character, have no stable order, or would be consumed on first use.
     None is rejected because it cannot be told apart from the string 'None'.
+
+    Components are restricted to str, int, and UUID, whose str() is stable across processes. Anything
+    else, including ORM instances, model classes, and Table objects, is rejected rather than hashed: a
+    value relying on the default repr embeds a memory address and would derive a different key in every
+    process, granting a lock that excludes nobody.
     """
 
     if not isinstance(args, (list, tuple)):
@@ -27,25 +33,20 @@ def validate(args: Any) -> None:
     for _arg in args:
         if _arg is None:
             raise PgAdvisoryLockError('Lock argument can not be "None".')
+        if not isinstance(_arg, LOCK_ARGUMENT_TYPES):
+            raise PgAdvisoryLockError(
+                f'Lock argument must be one of "{LOCK_ARGUMENT_TYPE_NAMES}", got "{type(_arg).__name__}" instead.'
+            )
 
 
 def normalize(arg: Any) -> str:
     """Reduce one lock component to the string used for key derivation.
 
-    DeclarativeBase instances and Table objects collapse to their table name, so both address the
-    same lock. Every other value uses its string representation, which makes normalization
-    deliberately type-insensitive: 1 and '1' yield the same component.
-
-    Model classes and legacy declarative_base() models are not recognized and fall through to that
-    string representation, which is not stable across processes. Pass Model.__table__ instead.
+    Normalization is deliberately type-insensitive: 1 and '1' yield the same component, so an integer
+    primary key and its string form address the same lock.
     """
 
-    if isinstance(arg, DeclarativeBase):
-        return str(arg.__tablename__)
-    elif isinstance(arg, Table):
-        return arg.name
-    else:
-        return str(arg)
+    return str(arg)
 
 
 def get_key_from_args(args: tuple[Any, ...]) -> int:
