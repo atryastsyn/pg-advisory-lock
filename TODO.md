@@ -2,7 +2,6 @@
 
 ## Next
 
-- [ ] Measure coverage with `pytest-cov` and gate CI with `--cov-fail-under`.
 - [ ] Test the declared support matrix in CI: Python 3.12 and 3.13 against SQLAlchemy 1.4 and 2.x, or narrow the pins.
 - [ ] Document the deadlock hazard: recommend a consistent lock ordering, and note that the default
       1000 ms timeout can surface a real deadlock as ordinary 55P03 contention.

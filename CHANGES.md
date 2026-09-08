@@ -2,6 +2,21 @@
 
 All notable changes to PG Advisory Lock are documented in this file.
 
+## [0.0.15] - 2026-09-08
+
+### Added
+
+- Add `pytest-cov` as a development dependency.
+- Measure `src` coverage on every `pytest` run and fail below 90%.
+
+### Changed
+
+- Update the package version and project priority list.
+
+### Notes
+
+- Coverage is now part of the CI contract: the existing `pytest` step fails when the threshold is missed.
+
 ## [0.0.14] - 2026-08-10
 
 ### Changed
