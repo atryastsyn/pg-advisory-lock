@@ -6,6 +6,13 @@ Provides a high-level interface for acquiring PostgreSQL advisory locks with str
 lock arguments and timeout support. Advisory locks are application-level locks that are
 automatically released when the transaction commits or rolls back.
 
+### Install
+```bash
+pip install pg-advisory-lock
+```
+
+Requires Python 3.12+ and SQLAlchemy 2.x.
+
 
 ### Key features:
 - Deterministic lock keys composed from `str`, `int`, and `uuid.UUID` components

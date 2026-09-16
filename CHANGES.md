@@ -2,6 +2,26 @@
 
 All notable changes to PG Advisory Lock are documented in this file.
 
+## [0.1.0] - 2026-09-16
+
+### Added
+
+- Add tests for installed distribution metadata versus a missing-metadata version fallback.
+
+### Changed
+
+- Mark the first Beta release: package version `0.1.0` and Development Status classifier
+  `4 - Beta`.
+- Raise the SQLAlchemy dependency floor from 1.4 to 2.0 (`>=2.0,<3.0`). SQLAlchemy 1.4 is no
+  longer a claimed extra.
+- Document `pip install pg-advisory-lock` and the Python 3.12+ / SQLAlchemy 2.x requirements
+  in the README.
+
+### Fixed
+
+- Survive missing distribution metadata in `__init__.py`: `__version__` falls back to
+  `0.0.0+unknown` instead of raising `PackageNotFoundError`.
+
 ## [0.0.17] - 2026-09-16
 
 ### Added
