@@ -2,6 +2,12 @@
 
 All notable changes to PG Advisory Lock are documented in this file.
 
+## [0.0.16] - 2026-09-16
+
+### Changed
+
+- Deploy flow to publish the project to PyPi.
+
 ## [0.0.15] - 2026-09-08
 
 ### Added
