@@ -20,6 +20,9 @@ class PgAdvisoryLock:
 
     An instance holds no session state and can be reused, but any single acquisition belongs to the
     one session and transaction that made it.
+
+    PostgreSQL advisory locks have well-known caveats that this class inherits; see the package
+    README.
     """
 
     def __init__(self, lock_args: list[Any] | tuple[Any, ...], raise_on_failure: bool = True) -> None:

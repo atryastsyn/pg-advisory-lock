@@ -113,6 +113,25 @@ is restored.
 A connection or infrastructure failure cannot be repaired by a savepoint and is
 propagated to the caller.
 
+### PostgreSQL advisory lock caveats
+PostgreSQL advisory locks have a few well-known caveats. This library inherits them; it does not
+remove or wrap them away. You should account for them when taking more than one lock or holding
+many distinct keys in one transaction.
+
+Details are in the [PostgreSQL advisory-lock documentation](https://www.postgresql.org/docs/current/explicit-locking.html#ADVISORY-LOCKS).
+
+- Taking more than one advisory lock in a transaction can deadlock if another session takes the
+  same locks in the opposite order. Use a consistent application order (for example parent before
+  child, or a stable resource identity). Do not sort by `lock_key`.
+- `lock()` sets a transaction-local `lock_timeout` (default 1000 ms). PostgreSQL's deadlock detector
+  only runs after `deadlock_timeout` (also 1 s by default). When `lock_timeout` expires first, a
+  real deadlock is reported as SQLSTATE `55P03` and becomes `PgAdvisoryLockTimeout` or `False`,
+  same as ordinary contention. A longer `timeout_in_ms` can instead surface `40P01`, which this
+  library does not treat as contention.
+- Each distinct advisory lock occupies a slot in PostgreSQL's shared lock table, sized from
+  `max_locks_per_transaction` and shared with ordinary relation and row locks. Exhaustion is an
+  out-of-shared-memory error, not `55P03`, and is propagated unchanged.
+
 ### Lock arguments and key generation
 `lock_args` must be a non-empty list or tuple. A bare string, set, mapping, generator,
 or other iterable is rejected.

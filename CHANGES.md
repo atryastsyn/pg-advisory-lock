@@ -2,6 +2,13 @@
 
 All notable changes to PG Advisory Lock are documented in this file.
 
+## [0.0.17] - 2026-09-16
+
+### Added
+
+- Document PostgreSQL advisory-lock caveats that this library inherits: lock ordering, timeout
+  masking of deadlocks as `55P03`, and `max_locks_per_transaction` shared lock slots.
+
 ## [0.0.16] - 2026-09-16
 
 ### Changed
