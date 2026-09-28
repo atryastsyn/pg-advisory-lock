@@ -1,0 +1,16 @@
+{
+    "name": "pg-advisory-lock",
+
+    "dockerComposeFile": [
+        "../compose.yaml",
+        "compose.yaml"
+    ],
+
+    "service": "dev",
+    "workspaceFolder": "/workspace",
+
+    "runServices": [
+        "dev",
+        "postgres"
+    ]
+}

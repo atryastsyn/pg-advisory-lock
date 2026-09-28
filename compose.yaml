@@ -3,9 +3,6 @@ services:
     image: postgres:18
     container_name: pg-advisory-lock-postgres18
 
-    ports:
-      - "6543:5432"
-
     environment:
       POSTGRES_DB: testing
       POSTGRES_USER: postgres
