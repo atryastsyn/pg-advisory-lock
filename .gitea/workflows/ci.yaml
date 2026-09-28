@@ -36,9 +36,9 @@ jobs:
           python-version: '3.12'
 
       - name: Check package index connectivity
-        # env:
-        #   HTTP_PROXY: ${{ vars.CI_PROXY }}
-        #   HTTPS_PROXY: ${{ vars.CI_PROXY }}
+        env:
+          HTTP_PROXY: ${{ vars.CI_PROXY }}
+          HTTPS_PROXY: ${{ vars.CI_PROXY }}
         run: curl -fsSI --connect-timeout 10 https://pypi.org/simple/
 
       - name: Install Poetry
