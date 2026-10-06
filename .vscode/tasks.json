@@ -45,7 +45,7 @@
         {
             "label": "docker-up",
             "type": "shell",
-            "command": "docker compose -f docker/compose.yaml up",
+            "command": "docker compose up -d",
             "presentation": {
                 "echo": true,
                 "reveal": "always",
@@ -58,7 +58,7 @@
         {
             "label": "docker-down",
             "type": "shell",
-            "command": "docker compose -f docker/compose.yaml down -v",
+            "command": "docker compose down -v",
             "presentation": {
                 "echo": true,
                 "reveal": "always",
