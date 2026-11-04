@@ -2,6 +2,21 @@
 
 All notable changes to PG Advisory Lock are documented in this file.
 
+## [0.1.1] - 2026-11-04
+
+### Added
+
+- Add PyCharm run configurations for Docker Compose, dependency installation, tests, mypy,
+  formatting, and switching to the master branch.
+
+### Changed
+
+- Move the Docker Compose configuration to the project root and update VS Code tasks.
+
+### Removed
+
+- Remove the `.python-version` file.
+
 ## [0.1.0] - 2026-09-16
 
 ### Added
