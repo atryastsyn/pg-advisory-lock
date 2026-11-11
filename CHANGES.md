@@ -2,6 +2,23 @@
 
 All notable changes to PG Advisory Lock are documented in this file.
 
+## [0.1.2] - 2026-11-11
+
+### Added
+
+- Add a GitHub Actions release workflow to build and publish to PyPI using trusted
+  publishing when a `v*` tag is pushed.
+
+### Changed
+
+- Migrate CI from Gitea Actions to GitHub Actions, preserving linting, formatting,
+  type checks, PostgreSQL-backed tests, and package builds.
+- Use Poetry 2.5.1 in CI and release workflows and update the dependency lock file.
+
+### Removed
+
+- Remove shared PyCharm run configurations.
+
 ## [0.1.1] - 2026-11-04
 
 ### Added
