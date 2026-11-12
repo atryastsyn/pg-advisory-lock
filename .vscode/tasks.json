@@ -7,92 +7,68 @@
             "label": "poetry-install",
             "type": "shell",
             "command": "poetry install",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "dedicated",
-                "showReuseMessage": false,
-                "clear": false
-            }
+            "problemMatcher": []
+        },
+        {
+            "label": "project-version",
+            "type": "shell",
+            "command": "poetry version -s",
+            "problemMatcher": []
+        },
+        {
+            "label": "git-create-tag",
+            "type": "shell",
+            "command": "git tag -a v${input:releaseVersion} -m \"Release v${input:releaseVersion}\"",
+            "problemMatcher": []
+        },
+        {
+            "label": "git-push-tag",
+            "type": "shell",
+            "command": "git push origin v${input:releaseVersion}",
+            "problemMatcher": []
         },
         {
             "label": "ruff-format",
             "type": "shell",
             "command": "poetry run ruff check --fix && poetry run ruff format",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "dedicated",
-                "showReuseMessage": false,
-                "clear": true
-            }
+            "problemMatcher": []
         },
         {
             "label": "tests-run",
             "type": "shell",
             "command": "poetry run pytest",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "dedicated",
-                "showReuseMessage": false,
-                "clear": true
-            }
+            "problemMatcher": []
         },
         {
             "label": "docker-up",
             "type": "shell",
             "command": "docker compose up -d",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "dedicated",
-                "showReuseMessage": false,
-                "clear": true
-            }
+            "problemMatcher": []
         },
         {
             "label": "docker-down",
             "type": "shell",
             "command": "docker compose down -v",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "dedicated",
-                "showReuseMessage": false,
-                "clear": true
-            }
+            "problemMatcher": []
         },
         {
             "label": "mypy-check",
             "type": "shell",
             "command": "poetry run mypy",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "dedicated",
-                "showReuseMessage": false,
-                "clear": true
-            }
+            "problemMatcher": []
         },
         {
             "label": "go-to-master",
             "type": "shell",
-            "command": "git checkout master && git fetch && git pull",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "dedicated",
-                "showReuseMessage": false,
-                "clear": false
-            }
+            "command": "git switch master && git pull --ff-only origin master",
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "releaseVersion",
+            "type": "promptString",
+            "description": "Release version (without v prefix)"
         }
     ]
 }
