@@ -195,7 +195,7 @@ poetry install
 Start the local PostgreSQL test database and run the test suite:
 
 ```bash
-docker compose -f docker/compose.yaml up -d
+docker compose up -d
 poetry run pytest
 ```
 
@@ -215,8 +215,60 @@ TEST_DATABASE_URL='postgresql+psycopg://user:password@host:5432/database' \
 Stop the local test database when it is no longer needed:
 
 ```bash
-docker compose -f docker/compose.yaml down
+docker compose down
 ```
+
+### Checks and GitHub workflows
+
+Run the same checks locally as the [CI workflow](.github/workflows/ci.yaml):
+
+```bash
+poetry run ruff check .
+poetry run ruff format --check .
+poetry run mypy
+poetry run pytest
+poetry build
+```
+
+CI runs on pull requests targeting `master` and pushes to `master`. It runs linting,
+formatting, type checks, tests against PostgreSQL, and a package build.
+
+### Releasing to PyPI
+
+1. Update the version in `pyproject.toml` and add the release notes to `CHANGES.md`.
+   Merge these changes into `master` and wait for CI to pass.
+2. Switch to the latest `master` and confirm the package version:
+
+   ```bash
+   git switch master
+   git pull --ff-only origin master
+   poetry version -s
+   ```
+
+3. Create an annotated tag matching that version, then push the tag. For version
+   `0.1.3`:
+
+   ```bash
+   git tag -a v0.1.3 -m "Release v0.1.3"
+   git push origin v0.1.3
+   ```
+
+Pushing a `v*` tag starts the [Release workflow](.github/workflows/release.yaml).
+It builds the distributions from the tagged commit and publishes them to PyPI using
+trusted publishing through the `pypi` GitHub environment. The release workflow
+does not run the CI checks, so tag the commit that passed CI. The package version
+comes from `pyproject.toml`; creating a tag does not update it.
+
+### VS Code tasks
+
+Use **Tasks: Run Task** to run the tasks in [.vscode/tasks.json](.vscode/tasks.json).
+The release flow uses `go-to-master`, `project-version`, `git-create-tag`, and
+`git-push-tag`, in that order. Both tag tasks prompt for the release version without
+the `v` prefix; enter the same version shown by `project-version` for each task.
+
+Tasks also cover dependency installation, formatting, type checks, tests, and the
+local PostgreSQL service. The `docker-down` task removes the database volume as well
+as stopping the service.
 
 
 ## License

@@ -2,6 +2,17 @@
 
 All notable changes to PG Advisory Lock are documented in this file.
 
+## [0.1.3] - 2026-11-12
+
+### Added
+
+- Add VS Code tasks to display the project version and create and push release tags.
+
+### Changed
+
+- Simplify VS Code task configuration and use a fast-forward-only pull when switching
+  to the master branch.
+
 ## [0.1.2] - 2026-11-11
 
 ### Added
